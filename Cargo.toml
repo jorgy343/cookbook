@@ -1,0 +1,2 @@
+[workspace]
+members = ["rocket_sample_api"]

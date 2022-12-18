@@ -1,0 +1,1 @@
+docker build -f build.dockerfile -t rocket_sample_api:latest .
