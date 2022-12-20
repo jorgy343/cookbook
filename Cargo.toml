@@ -1,2 +1,2 @@
 [workspace]
-members = ["rocket_sample_api"]
+members = ["rocket_sample_data", "rocket_sample_api"]

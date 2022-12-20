@@ -1,5 +1,3 @@
-//! Contains routes for managing and retrieving recipes.
-
 use rocket::{
     fairing,
     serde::{json::Json, Serialize},
@@ -9,23 +7,23 @@ use rocket::{
 #[serde(crate = "rocket::serde")]
 pub struct Recipe {
     id: u64,
-    pub name: &'static str,
-    pub description: &'static str,
+    pub name: String,
+    pub description: String,
     pub steps: Vec<RecipeStep>,
 }
 
 #[derive(Serialize)]
 #[serde(crate = "rocket::serde")]
 pub struct RecipeStep {
-    pub description: &'static str,
+    pub description: String,
 }
 
 impl Recipe {
     pub fn new(id: u64, name: &'static str, description: &'static str) -> Self {
         Self {
             id,
-            name,
-            description,
+            name: name.to_string(),
+            description: description.to_string(),
             steps: Vec::new(),
         }
     }
