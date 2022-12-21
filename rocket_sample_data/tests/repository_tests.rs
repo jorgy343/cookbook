@@ -1,8 +1,5 @@
 use mongodb::{Client, Collection};
-use rocket_sample_data::{
-    recipe::Recipe,
-    repository::{MongoRecipeRepository, RecipeRepository},
-};
+use rocket_sample_data::{recipe::Recipe, recipe_repository::RecipeRepository};
 
 #[tokio::test]
 async fn test_create_integration() {
@@ -11,10 +8,9 @@ async fn test_create_integration() {
     let collection: Collection<Recipe> = client.database("test_db").collection("recipes");
 
     // Insert a test recipe.
-    let recipe = Recipe::new(1, "Cake", "One delicious cake.");
-    let repository = MongoRecipeRepository::new(client, collection);
+    let recipe = Recipe::new("Cake", "One delicious cake.");
 
-    let result = repository.create(&recipe).await;
+    let result = collection.create(&recipe).await;
 
     assert!(result.is_ok());
 

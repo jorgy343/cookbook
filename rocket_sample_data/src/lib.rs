@@ -1,2 +1,2 @@
 pub mod recipe;
-pub mod repository;
+pub mod recipe_repository;

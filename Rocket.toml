@@ -1,2 +1,7 @@
 [default]
 port = 8080
+
+[default.mongo]
+connection_string = "mongodb://localhost"
+database_name = "rocket_sample"
+recipe_collection_name = "recipes"
