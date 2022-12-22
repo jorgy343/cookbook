@@ -1,50 +1,67 @@
 use rocket::{
     fairing,
-    serde::{json::Json, Serialize},
+    http::Status,
+    request::{self, FromRequest},
+    serde::json::Json,
     State,
+};
+use rocket_okapi::{
+    okapi::openapi3::{Object, SecurityRequirement, SecurityScheme, SecuritySchemeData},
+    openapi, openapi_get_routes,
+    request::{OpenApiFromRequest, RequestHeaderInput},
 };
 use rocket_sample_data::recipe_repository::RecipeRepository;
 
-use crate::ApiError;
+use crate::{recipes_models::Recipe, ApiError};
 
-#[derive(Serialize)]
-#[serde(crate = "rocket::serde")]
-pub struct Recipe {
-    pub name: String,
-    pub description: String,
-    pub steps: Vec<RecipeStep>,
-}
+struct ApiKey;
 
-impl From<rocket_sample_data::recipe::Recipe> for Recipe {
-    fn from(value: rocket_sample_data::recipe::Recipe) -> Self {
-        Self {
-            name: value.name,
-            description: value.description,
-            steps: value
-                .steps
-                .iter()
-                .map(|recipe_step| RecipeStep::from(recipe_step.clone()))
-                .collect(),
+#[async_trait]
+impl<'r> FromRequest<'r> for ApiKey {
+    type Error = ApiError;
+
+    async fn from_request(request: &'r rocket::Request<'_>) -> request::Outcome<Self, Self::Error> {
+        if let Some(api_key) = request.headers().get_one("x-api-key") {
+            if api_key == "TEST" {
+                return request::Outcome::Success(ApiKey);
+            }
         }
+
+        request::Outcome::Failure((
+            Status::Unauthorized,
+            ApiError::AuthError("Bad auth!".to_string()),
+        ))
     }
 }
 
-#[derive(Serialize)]
-#[serde(crate = "rocket::serde")]
-pub struct RecipeStep {
-    pub description: String,
-}
+impl<'r> OpenApiFromRequest<'r> for ApiKey {
+    fn from_request_input(
+        _gen: &mut rocket_okapi::gen::OpenApiGenerator,
+        _name: String,
+        _required: bool,
+    ) -> rocket_okapi::Result<RequestHeaderInput> {
+        let mut security_requirements = SecurityRequirement::new();
+        security_requirements.insert("ApiKeyAuth".to_string(), vec![]);
 
-impl From<rocket_sample_data::recipe::RecipeStep> for RecipeStep {
-    fn from(value: rocket_sample_data::recipe::RecipeStep) -> Self {
-        Self {
-            description: value.description,
-        }
+        Ok(RequestHeaderInput::Security(
+            "ApiKeyAuth".to_string(),
+            SecurityScheme {
+                description: None,
+                data: SecuritySchemeData::ApiKey {
+                    name: "x-api-key".to_string(),
+                    location: "header".to_string(),
+                },
+                extensions: Object::default(),
+            },
+            security_requirements,
+        ))
     }
 }
 
+#[openapi]
 #[get("/<recipe_name>")]
 async fn get(
+    _api_key: ApiKey,
     recipe_name: String,
     recipe_repository: &State<Box<dyn RecipeRepository>>,
 ) -> Result<Option<Json<Recipe>>, ApiError> {
@@ -59,8 +76,22 @@ async fn get(
     Ok(None)
 }
 
+// #[openapi]
+// #[post("/", data = "<recipe>")]
+// async fn create(
+//     _api_key: ApiKey,
+//     recipe: Json<Recipe>,
+//     recipe_repository: &State<Box<dyn RecipeRepository>>,
+// ) -> Result<Json<Recipe>, ApiError> {
+//     let data_recipe: rocket_sample_data::recipe::Recipe = Recipe::into(recipe.0);
+
+//     Ok(recipe)
+// }
+
 pub fn stage() -> fairing::AdHoc {
     fairing::AdHoc::on_ignite("Recipes", |rocket| async {
-        rocket.mount("/recipes", routes![get])
+        rocket
+            .mount("/recipes", routes![get])
+            .mount("/open-api", openapi_get_routes![get])
     })
 }
