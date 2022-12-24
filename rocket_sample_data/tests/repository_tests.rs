@@ -1,14 +1,14 @@
 use mongodb::{Client, Collection};
-use rocket_sample_data::{recipe::Recipe, recipe_repository::RecipeRepository};
+use rocket_sample_data::{recipe::RecipeDataModel, recipe_repository::RecipeRepository};
 
 #[tokio::test]
 async fn test_create_integration() {
     // Connect to a real MongoDB instance.
     let client = Client::with_uri_str("mongodb://localhost").await.unwrap();
-    let collection: Collection<Recipe> = client.database("test_db").collection("recipes");
+    let collection: Collection<RecipeDataModel> = client.database("test_db").collection("recipes");
 
     // Insert a test recipe.
-    let recipe = Recipe::new("Cake", "One delicious cake.");
+    let recipe = RecipeDataModel::new("Cake", "One delicious cake.");
 
     let result = collection.create(&recipe).await;
 

@@ -32,7 +32,7 @@ async fn rocket() -> _ {
     let mongo_client =
         Client::with_options(mongo_client_options).expect("Failed to create the Mongo client.");
 
-    let recipe_collection: Collection<rocket_sample_data::recipe::Recipe> = mongo_client
+    let recipe_collection: Collection<rocket_sample_data::recipe::RecipeDataModel> = mongo_client
         .database(&mongo_config.database_name)
         .collection(&mongo_config.recipe_collection_name);
 

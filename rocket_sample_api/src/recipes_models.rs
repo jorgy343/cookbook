@@ -3,28 +3,28 @@ use rocket_okapi::JsonSchema;
 
 #[derive(Debug, Clone, Serialize, Deserialize, JsonSchema)]
 #[serde(crate = "rocket::serde")]
-pub struct Recipe {
+pub struct RecipeApiModel {
     pub name: String,
     pub description: String,
-    pub steps: Vec<RecipeStep>,
+    pub steps: Vec<RecipeStepApiModel>,
 }
 
-impl From<rocket_sample_data::recipe::Recipe> for Recipe {
-    fn from(value: rocket_sample_data::recipe::Recipe) -> Self {
+impl From<rocket_sample_data::recipe::RecipeDataModel> for RecipeApiModel {
+    fn from(value: rocket_sample_data::recipe::RecipeDataModel) -> Self {
         Self {
             name: value.name,
             description: value.description,
             steps: value
                 .steps
                 .iter()
-                .map(|recipe_step| RecipeStep::from(recipe_step.clone()))
+                .map(|recipe_step| RecipeStepApiModel::from(recipe_step.clone()))
                 .collect(),
         }
     }
 }
 
-impl From<Recipe> for rocket_sample_data::recipe::Recipe {
-    fn from(value: Recipe) -> Self {
+impl From<RecipeApiModel> for rocket_sample_data::recipe::RecipeDataModel {
+    fn from(value: RecipeApiModel) -> Self {
         Self {
             name: value.name,
             description: value.description,
@@ -32,7 +32,7 @@ impl From<Recipe> for rocket_sample_data::recipe::Recipe {
                 .steps
                 .iter()
                 .map(|recipe_step| {
-                    rocket_sample_data::recipe::RecipeStep::from(recipe_step.clone())
+                    rocket_sample_data::recipe::RecipeStepDataModel::from(recipe_step.clone())
                 })
                 .collect(),
         }
@@ -41,20 +41,20 @@ impl From<Recipe> for rocket_sample_data::recipe::Recipe {
 
 #[derive(Debug, Clone, Serialize, Deserialize, JsonSchema)]
 #[serde(crate = "rocket::serde")]
-pub struct RecipeStep {
+pub struct RecipeStepApiModel {
     pub description: String,
 }
 
-impl From<rocket_sample_data::recipe::RecipeStep> for RecipeStep {
-    fn from(value: rocket_sample_data::recipe::RecipeStep) -> Self {
+impl From<rocket_sample_data::recipe::RecipeStepDataModel> for RecipeStepApiModel {
+    fn from(value: rocket_sample_data::recipe::RecipeStepDataModel) -> Self {
         Self {
             description: value.description,
         }
     }
 }
 
-impl From<RecipeStep> for rocket_sample_data::recipe::RecipeStep {
-    fn from(value: RecipeStep) -> Self {
+impl From<RecipeStepApiModel> for rocket_sample_data::recipe::RecipeStepDataModel {
+    fn from(value: RecipeStepApiModel) -> Self {
         Self {
             description: value.description,
         }

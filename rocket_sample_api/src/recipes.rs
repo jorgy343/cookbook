@@ -12,7 +12,7 @@ use rocket_okapi::{
 };
 use rocket_sample_data::recipe_repository::RecipeRepository;
 
-use crate::{recipes_models::Recipe, ApiError};
+use crate::{recipes_models::RecipeApiModel, ApiError};
 
 struct ApiKey;
 
@@ -64,13 +64,13 @@ async fn get(
     _api_key: ApiKey,
     recipe_name: String,
     recipe_repository: &State<Box<dyn RecipeRepository>>,
-) -> Result<Option<Json<Recipe>>, ApiError> {
+) -> Result<Option<Json<RecipeApiModel>>, ApiError> {
     if let Some(recipe) = recipe_repository
         .get(&recipe_name)
         .await
         .map_err(|e| ApiError::DatabaseError(e.kind.to_string()))?
     {
-        return Ok(Some(Json(Recipe::from(recipe))));
+        return Ok(Some(Json(RecipeApiModel::from(recipe))));
     }
 
     Ok(None)
